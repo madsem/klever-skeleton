@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+
+// autoload dependencies
+require_once __DIR__ . '/vendor/autoload.php';
+
+// bootstrap everythang...
+require_once __DIR__ . '/bootstrap/app.php';
+
+// instantiate console app from bootstrap
+$app = container()->get('console');
+
+// run
+$app->run();

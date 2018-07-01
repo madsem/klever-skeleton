@@ -1,0 +1,43 @@
+{
+  "name": "madsem/slim-skeleton",
+  "description": "A basic starter structure for Slim 3. Everything you need for simple single-user projects.",
+  "keywords": [
+    "slim framework",
+    "slim",
+    "skeleton"
+  ],
+  "license": "MIT",
+  "type": "project",
+  "require": {
+    "php": ">=7.0",
+    "slim/slim": "^3.10",
+    "slim/twig-view": "^2.4",
+    "slim/csrf": "^0.8.2",
+    "illuminate/database": "^5.6",
+    "vlucas/phpdotenv": "^2.4",
+    "symfony/console": "^4.1",
+    "league/container": "^2.4",
+    "jenssegers/lean": "^0.3.0",
+    "predis/predis": "^1.1",
+    "slim/flash": "^0.4.0"
+  },
+  "autoload": {
+    "files": [
+      "bootstrap/helpers.php"
+    ],
+    "psr-4": {
+      "Klever\\": "app"
+    }
+  },
+  "scripts": {
+    "post-root-package-install": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ]
+  },
+  "require-dev": {
+    "symfony/var-dumper": "^4.1"
+  },
+  "config": {
+    "optimize-autoloader": true
+  }
+}

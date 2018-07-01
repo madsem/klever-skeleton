@@ -1,0 +1,7 @@
+vendor
+.idea
+.env
+node_modules
+storage/cache/config/*
+storage/cache/routes/*
+storage/cache/views/*

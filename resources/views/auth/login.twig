@@ -1,0 +1,10 @@
+{% extends 'auth/layout.twig' %}
+
+{% block auth %}
+<form method="post" action="{{ path_for('auth.login') }}">
+    <input type="text" name="username" autocomplete="username">
+    <input type="password" name="password" autocomplete="current-password">
+    <input type="submit" value="Login">
+    {{ csrf.field | raw }}
+</form>
+{% endblock %}

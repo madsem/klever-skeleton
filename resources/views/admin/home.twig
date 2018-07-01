@@ -1,0 +1,6 @@
+{{ data }}, welcome to the admin UI!
+<br>
+<form method="post" name="logout" action="{{ path_for('auth.logout') }}">
+    <button type="submit">Logout</button>
+    {{ csrf.field | raw }}
+</form>

@@ -1,0 +1,17 @@
+{% if flash.getMessage('error') %}
+
+{{  flash.getMessage('error') | first }}
+
+{% endif %}
+
+{% if flash.getMessage('info') %}
+
+    {{  flash.getMessage('info') | first }}
+
+{% endif %}
+
+{% if flash.getMessage('message') %}
+
+    {{  flash.getMessage('message') | first }}
+
+{% endif %}
