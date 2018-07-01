@@ -1,11 +1,4 @@
 # Klever Skeleton
-TODO:
-auth - done
-cookies - done
-auth middlewares - done
-csrf protection & twig extension - done
-fix command cache:clear errors about empty folders - done
-asset function for twig
 
 #### Slim 3 starter app  
 Just the basics to get any project of the ground pretty quickly.
@@ -143,6 +136,12 @@ class HomeController
 CSRF Field in Views:
 ```html
 {{ csrf.field | raw }}
+```
+
+Asset helper in views:
+```html
+{{ asset('css/app.css') }}
+
 ```
 
 Various:
