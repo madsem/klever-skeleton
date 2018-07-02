@@ -9,12 +9,16 @@ Just the basics to get any project of the ground pretty quickly.
 - Basic DB driven Authentication
 - Redis/Native Sessions
 - Redis/Array Cache
+- Cookies
 - ORM (Laravel Eloquent) - Multi DB Connection support
 - Basic Config Service
-- Console Commands & Service Providers incl. Auto-Wiring Support
+- Symfony Console
+- Auto-Wiring Support
+- Flash Messages - Slim\Flash\Messages
+- CSRF Protection - Slim\Csrf
 
 ## Requirements
-- PHP 7.0+
+- PHP 7.0.0+
 
 ## Getting Started
 
@@ -181,6 +185,7 @@ app()->add('something');
 * [Slim Framework](http://slimframework.com) - Framework
 * [Eloquent](https://github.com/illuminate/database) - ORM
 * [PHP League](https://github.com/thephpleague/container) - Container
+* [Symfony Console](https://symfony.com/doc/current/components/console.html) - Console
 
 ## Contributing
 
@@ -192,7 +197,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/madsem/klever-skeleton/blob/master/LICENSE) file for details
 
 ## Acknowledgments
 
