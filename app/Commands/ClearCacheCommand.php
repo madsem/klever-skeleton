@@ -15,7 +15,7 @@ final class ClearCacheCommand extends Command
     protected function configure()
     {
         $this->setName('cache:clear');
-        $this->setDescription('Clears all caches');
+        $this->setDescription('Clears all file caches');
     }
 
     /**
@@ -26,7 +26,7 @@ final class ClearCacheCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->removeDirectoryContents(
-            config()->get('app.settings.cache_paths')
+            config()->get('paths.cache')
         );
 
         // success

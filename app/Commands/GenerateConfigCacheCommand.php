@@ -20,7 +20,7 @@ final class GenerateConfigCacheCommand extends Command
 
     function __construct() {
         parent::__construct();
-        $this->cachePath = rtrim(config()->get('app.settings.cache_paths.config'), '/');
+        $this->cachePath = rtrim(config()->get('paths.cache.config'), '/');
         $this->cacheFile = '/app.php';
     }
 

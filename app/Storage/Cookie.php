@@ -19,7 +19,7 @@ class Cookie implements StorageInterface
     function __construct(array $config)
     {
         $this->path = $config['path'] ?? $this->path;
-        $this->domain = $config['domain'] ?? $this->domain;
+        $this->domain = getHostNoSubDomain() ?? $config['domain'];
         $this->secure = $config['secure'] ?? $this->secure;
         $this->http_only = $config['http_only'] ?? $this->http_only;
     }
@@ -76,7 +76,7 @@ class Cookie implements StorageInterface
      *
      * @return mixed|void
      */
-    function destroy()
+    function flush()
     {
         if ($this->exists()) {
             foreach ($_COOKIE as $name => $value) {

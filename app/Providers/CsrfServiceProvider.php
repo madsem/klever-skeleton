@@ -31,7 +31,14 @@ class CsrfServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()
              ->share('csrf', function () {
-                 return new Guard();
+
+                 $csrf = new Guard();
+
+                 // set to true if only single-user app
+                 // to make repeated ajax calls work with csrf failure.
+                 $csrf->setPersistentTokenMode(true);
+
+                 return $csrf;
              });
     }
 }

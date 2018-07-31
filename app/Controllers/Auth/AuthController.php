@@ -32,6 +32,18 @@ class AuthController
      */
     function authenticate()
     {
+        $v = validator(request()->getParams());
+        $v->rule('required', [
+            'username',
+            'password'
+        ]);
+
+        if( ! $v->validate()) {
+            message('error', "All Form Fields Need To Be Filled...");
+
+            return redirect(route('auth.login'), 301);
+        }
+
         $authenticated = $this->auth->attempt(
             request()->getParam('username'),
             request()->getParam('password')
@@ -57,6 +69,6 @@ class AuthController
     {
         $this->auth->logout();
 
-        return redirect(route('home'), 301);
+        return redirect(route('auth.login'), 301);
     }
 }

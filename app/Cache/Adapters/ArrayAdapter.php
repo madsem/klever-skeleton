@@ -67,6 +67,18 @@ class ArrayAdapter implements AdapterInterface
     }
 
     /**
+     * Just an empty method because
+     * array cache is not persistent anyways
+     *
+     * @param string $pattern
+     * @return bool
+     */
+    function forgetPattern($pattern)
+    {
+        return true;
+    }
+
+    /**
      * @param $key
      * @param $value
      * @return mixed

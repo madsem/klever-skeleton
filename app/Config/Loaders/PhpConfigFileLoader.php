@@ -28,20 +28,23 @@ class PhpConfigFileLoader implements LoaderInterface
         $files = $this->isCached();
 
         if ( ! $files) {
+            $files = [];
             $iterator = new \GlobIterator($this->path . '/*.php', \FilesystemIterator::KEY_AS_FILENAME);
 
             if ($iterator->count()) {
                 foreach ($iterator as $file) {
-                    // get filename without .ext
-                    $key = $file->getBasename('.' . $file->getExtension());
 
                     try {
-                        $files[$key] = require_once $file->getPathname();
+                        $file = require_once $file->getPathname();
+                        array_push($files, $file);
                     } catch (\Exception $e) {
                         //
                     }
                 }
             }
+
+            // merge first level of array so we have one big settings array
+            $files =  call_user_func_array('array_merge', $files);
         }
 
         return $files;
@@ -54,10 +57,18 @@ class PhpConfigFileLoader implements LoaderInterface
      */
     function isCached()
     {
-        if (file_exists($this->cacheFile)) {
-            return require_once $this->cacheFile;
+        // memoize results
+        static $cache = null;
+
+        if (is_null($cache)) {
+            if (file_exists($this->cacheFile)) {
+                $cache = require_once $this->cacheFile;
+            }
+            else {
+                $cache = false;
+            }
         }
 
-        return false;
+        return $cache;
     }
 }

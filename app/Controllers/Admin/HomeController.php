@@ -14,8 +14,6 @@ class HomeController
             return session()->get('admin');
         });
 
-        return view('admin/home.twig', [
-            'data' => $data,
-        ]);
+        return view('admin/home.twig', compact('data'));
     }
 }

@@ -6,8 +6,7 @@ namespace Klever\App;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidFileException;
 use Dotenv\Exception\InvalidPathException;
-use Jenssegers\Lean\SlimServiceProvider;
-use Klever\Providers\ConfigServiceProvider;
+use Klever\Providers\AppServiceProvider;
 use League\Container\Container;
 use League\Container\ReflectionContainer;
 use Slim\App;
@@ -54,7 +53,7 @@ class Wrapper
         // use the PHP League Container
         $container = new Container();
         $container->delegate(new ReflectionContainer());
-        $container->addServiceProvider(new SlimServiceProvider());
+        $container->addServiceProvider(new AppServiceProvider());
 
         // instantiate Slim
         $app = new App($container);
@@ -69,17 +68,8 @@ class Wrapper
      */
     private static function bootServiceProviders()
     {
-        // register application config service
-        container()->addServiceProvider(new ConfigServiceProvider());
-
-        // replace Slims default settings with app config
-        $settings = container()->get('settings');
-        $settings->replace(
-            config()->get('app.settings')
-        );
-
         // load all other service providers
-        foreach (config()->get('app.settings.providers') as $provider) {
+        foreach (container()->get('settings')['providers'] as $provider) {
             container()->addServiceProvider(new $provider);
         }
 

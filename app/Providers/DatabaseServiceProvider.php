@@ -35,9 +35,10 @@ class DatabaseServiceProvider extends AbstractServiceProvider
 
                  $capsule = new Manager();
                  // configure connections
-                 foreach (config()->get('app.settings.connections') as $name => $connection) {
+                 foreach (config()->get('connections') as $name => $connection) {
                      $capsule->addConnection($connection, $name);
                  }
+
                  $capsule->setAsGlobal();
                  $capsule->bootEloquent();
 

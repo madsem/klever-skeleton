@@ -35,7 +35,7 @@ interface StorageInterface
      *
      * @return mixed
      */
-    function destroy();
+    function flush();
 
     /**
      * Retrieve all items

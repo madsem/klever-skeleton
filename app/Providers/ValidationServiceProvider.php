@@ -2,11 +2,10 @@
 
 namespace Klever\Providers;
 
-use Klever\Config\Config;
 use League\Container\ServiceProvider\AbstractServiceProvider;
-use Symfony\Component\Console\Application;
+use Valitron\Validator;
 
-class ConsoleServiceProvider extends AbstractServiceProvider
+class ValidationServiceProvider extends AbstractServiceProvider
 {
 
     /**
@@ -19,7 +18,7 @@ class ConsoleServiceProvider extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
-        'console',
+        'validator',
     ];
 
     /**
@@ -31,22 +30,9 @@ class ConsoleServiceProvider extends AbstractServiceProvider
     function register()
     {
         $this->getContainer()
-             ->add('console', function () {
+             ->share('validator', function () {
 
-                 // register console commands
-                 $commands = [];
-                 foreach (config()->get('commands') as $command) {
-
-                     // auto-wire commands with arguments
-                     $newCommand = $this->getContainer()->get($command);
-
-                     array_push($commands, $newCommand);
-                 }
-
-                 $application = new Application();
-                 $application->addCommands($commands);
-
-                 return $application;
+                 return (new Validator());
              });
     }
 }

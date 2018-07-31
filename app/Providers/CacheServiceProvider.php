@@ -39,14 +39,14 @@ class CacheServiceProvider extends AbstractServiceProvider
 
                  // TODO: this if / else kinda sucks, not sure how to do better atm
                  // Help wanted
-                 if (config()->get('app.settings.cache.driver') == 'redis') {
+                 if (config()->get('cache.driver') == 'redis') {
                      $client = new Client([
                          'scheme'   => 'tcp',
-                         'host'     => config()->get('app.settings.redis.host'),
-                         'port'     => config()->get('app.settings.redis.port'),
-                         'password' => config()->get('app.settings.redis.password')
+                         'host'     => config()->get('redis.host'),
+                         'port'     => config()->get('redis.port'),
+                         'password' => config()->get('redis.password')
                      ], [
-                         'prefix' => config()->get('app.settings.cache.prefix')
+                         'prefix' => config()->get('cache.prefix')
                      ]);
 
                      $adapter = new PredisAdapter($client);

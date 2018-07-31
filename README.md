@@ -5,20 +5,35 @@ Just the basics to get any project of the ground pretty quickly.
 
 ##### Includes:  
 - Slim 3 - doh!  
+    * Slim Environment aware of X_HTTP_FORWARDED_PROTO to work behind SSL terminated AWS ELB's  
+      (should be disabled if not using AWS ELB, in AppServiceProvider & ForceSslMiddleware)
 - DI Container (PHP League)
 - Basic DB driven Authentication
+    * configurable session lifetimes for logged in / guests
 - Redis/Native Sessions
+    * Native should be used only for development
 - Redis/Array Cache
+    * Array should be used only for development
 - Cookies
-- ORM (Laravel Eloquent) - Multi DB Connection support
+- ORM (Laravel Eloquent)
+    * Multi DB Connection support
+    * Pagination
+- PHINX Migrations
+    * Laravel Schema Builder integration
 - Basic Config Service
 - Symfony Console
 - Auto-Wiring Support
 - Flash Messages - Slim\Flash\Messages
 - CSRF Protection - Slim\Csrf
+    * Ajax Twig integration
+- Valitron Validation
+
+This skeleton deliberately has no asset management like webpack or gulp, nor specific asset directories / asset helper.  
+So with each build it can be integrated as needed, for example build in a modular way for multi-domain / theme websites.
 
 ## Requirements
-- PHP 7.0.0+
+- PHP 7.2.0+
+- Redis 4.0+ (For UNLINK support)
 
 ## Getting Started
 
@@ -28,17 +43,10 @@ Simply run
 composer create-project madsem/klever-skeleton path/to/your/project
 ```
 
-Create a database & 'users' table with at least the following fields:
-- id
-- username
-- email
-- password (must be hashed by php's password_hash() method)
-- created_at
-- updated_at
-
-Rename ```.env.example``` to ```.env``` and fill in your environment details.
-
-Then create asset directories in whatever structure you prefer, inside /public.
+Rename ```.env.example``` to ```.env``` and fill in your environment details.  
+Run the user migration.   
+```vendor/bin/phinx migrate```  
+(You should phinx to your PATH, then you can just use ```phinx migrate```)
 
 You should be good to go now :)
 
@@ -55,16 +63,24 @@ Service Providers, Console Commands are registered in ```config/app.php``` and a
 
 Console commands, Controllers/Actions also support auto-wiring if required.
 
-Global helpers (```bootstrap/helpers.php```) are available everywhere, even in the application config.
+Global helpers (```bootstrap/helpers.php```) for pretty much anything, are available everywhere, even in the application config.
 
 ## Deploying
 
 Run the following commands during deployment:
 ```bash
-composer update
+################
+# On Prod Server
+###############
+# install composer dependencies
+composer install -o
 
 # production cache for config files
 php klever cache:config
+
+# migrate database
+phinx migrate
+
 ```
 
 ## Console Commands
@@ -130,9 +146,7 @@ class HomeController
             return Post::all();
         });
   
-        return view('home.twig', [
-            'posts' => $data,
-        ]);
+        return view('home.twig', compact('data'));
     }
 }
 ```
@@ -142,10 +156,9 @@ CSRF Field in Views:
 {{ csrf.field | raw }}
 ```
 
-Asset helper in views:
+CSRF Field in Javascript:
 ```html
-{{ asset('css/app.css') }}
-
+{{ csrf.object | raw }}
 ```
 
 Various:
@@ -164,19 +177,22 @@ cookie()->set('cart', 'abandoned', 60);
 cookie()->config('http_only', false');
 
 # redirect to named route
-return redirect(route('auth.login'), 301)
+return redirect(route('auth.login'), 301);
 
 # redirect to a third party
-return redirect('http://google.com/, 302)
+return redirect('http://google.com/', 302);
 
 # get config items
-config()->get('app.settings.db');
+config()->get('db');
 
 # retrieve something from global container
 container()->get('myContainerItem');
 
 # directly access app instance methods
 app()->add('something');
+
+# paginate eloquent collection
+{{ collectionName.links | raw }}
 
 ```
 

@@ -38,6 +38,11 @@ class Cache implements AdapterInterface
         return $this->adapter->forget($key);
     }
 
+    function forgetPattern($pattern)
+    {
+        return $this->adapter->forgetPattern($pattern);
+    }
+
     function setCacheAdapter(AdapterInterface $adapter)
     {
         $this->adapter = $adapter;

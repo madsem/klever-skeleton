@@ -15,4 +15,6 @@ interface AdapterInterface
     function remember($key, $minutes = null, callable $callback);
 
     function forget($key);
+
+    function forgetPattern($pattern);
 }

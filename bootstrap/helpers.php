@@ -59,16 +59,17 @@ if ( ! function_exists('redirect')) {
 if ( ! function_exists('route')) {
     /**
      * Generate absolute or relative
-     * URL to a named route
+     * URL to a named route with optional arguments
      *
      * @param $name
      * @param bool $absolute
+     * @param array $args
      * @return string
      */
-    function route($name, $absolute = true): string
+    function route($name, array $args = [], $absolute = true): string
     {
         $route = container()->get('router')
-                            ->pathFor($name);
+                            ->pathFor($name, $args);
 
         $scheme = request()->getUri()->getScheme();
         $host = request()->getUri()->getHost();
@@ -99,11 +100,21 @@ if ( ! function_exists('view')) {
      * @param array $args
      * @return \Slim\Http\Response
      */
-    function view($name, $args = []): \Slim\Http\Response
+    function view($name, $args = [])
     {
         $view = container()->get('view');
 
-        return $view->render($name, $args);
+        try {
+
+            return $view->render($name, $args);
+
+        } catch (Exception $error) {
+
+            // this only happens if a template wasn't found
+            // i.e: if we would link to a non-existing view in twig
+            // or another method that dynamically routes to a view at runtime
+            return $view->render('errors/404.twig');
+        }
     }
 }
 
@@ -175,7 +186,38 @@ if ( ! function_exists('message')) {
     }
 }
 
-if ( ! function_exists('env')) {
+if ( ! function_exists('validator')) {
+    /**
+     * Wrapper for Valitron\Validator
+     *
+     * @param array $data
+     * @param array $fields
+     * @return mixed
+     */
+    function validator($data = array(), $fields = array())
+    {
+        return container()
+            ->get('validator')->withData($data, $fields);
+    }
+}
+
+if ( ! function_exists('getHostNoSubDomain')) {
+    /**
+     * Get only domain.tld in case we have a sub domain
+     * Explode host name and take last two elements from array
+     * this means two-tier TLDs are not supported
+     * To support this we would also need to compare against a list of all possible TLDs like .co.uk etc.
+     *
+     * @return string
+     */
+    function getHostNoSubDomain(): string
+    {
+        $host = request()->getUri()->getHost();
+        return implode('.', array_slice(explode('.', $host), -2));
+    }
+}
+
+if ( ! function_exists('vars')) {
     /**
      * Return requested key from environment
      * or return default value
@@ -186,7 +228,7 @@ if ( ! function_exists('env')) {
      *
      * @link https://github.com/illuminate/support/blob/master/helpers.php
      */
-    function env($key, $default = null)
+    function vars($key, $default = null)
     {
         $value = getenv($key);
 
@@ -199,7 +241,6 @@ if ( ! function_exists('env')) {
             case '(true)':
                 return true;
             case 'false':
-            case '(false)':
                 return false;
             case 'empty':
             case '(empty)':
@@ -209,10 +250,6 @@ if ( ! function_exists('env')) {
                 return null;
         }
 
-        if (($valueLength = strlen($value)) > 1 && $value[0] === '"' && $value[$valueLength - 1] === '"') {
-            return substr($value, 1, -1);
-        }
-
-        return $value;
+        return trim($value, '\'"');
     }
 }

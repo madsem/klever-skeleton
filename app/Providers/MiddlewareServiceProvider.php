@@ -2,11 +2,11 @@
 
 namespace Klever\Providers;
 
-use Klever\Config\Config;
-use League\Container\ServiceProvider\AbstractServiceProvider;
-use Symfony\Component\Console\Application;
 
-class ConsoleServiceProvider extends AbstractServiceProvider
+use Klever\Middleware\ForceSslMiddleWare;
+use League\Container\ServiceProvider\AbstractServiceProvider;
+
+class MiddlewareServiceProvider extends AbstractServiceProvider
 {
 
     /**
@@ -19,7 +19,7 @@ class ConsoleServiceProvider extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
-        'console',
+        'force-ssl',
     ];
 
     /**
@@ -30,23 +30,12 @@ class ConsoleServiceProvider extends AbstractServiceProvider
      */
     function register()
     {
+
+        // register force ssl middleware
         $this->getContainer()
-             ->add('console', function () {
-
-                 // register console commands
-                 $commands = [];
-                 foreach (config()->get('commands') as $command) {
-
-                     // auto-wire commands with arguments
-                     $newCommand = $this->getContainer()->get($command);
-
-                     array_push($commands, $newCommand);
-                 }
-
-                 $application = new Application();
-                 $application->addCommands($commands);
-
-                 return $application;
+             ->share('force-ssl', function () {
+                 return new ForceSslMiddleWare();
              });
+
     }
 }

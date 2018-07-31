@@ -3,6 +3,7 @@
 namespace Klever\Providers;
 
 
+use Klever\Session\Handlers\NativeSessionHandler;
 use Klever\Session\Handlers\PredisSessionHandler;
 use Klever\Storage\Session;
 use League\Container\ServiceProvider\AbstractServiceProvider;
@@ -21,6 +22,7 @@ class SessionServiceProvider extends AbstractServiceProvider
      * @var array
      */
     protected $provides = [
+        'session-handler',
         'session',
     ];
 
@@ -32,31 +34,43 @@ class SessionServiceProvider extends AbstractServiceProvider
      */
     function register()
     {
-        $this->getContainer()
-             ->share('session', function () {
 
-                 // TODO: this if / else kinda sucks, not sure how to do better atm
-                 // Help wanted
-                 if (config()->get('app.settings.session.handler') == 'redis') {
+        // register session handler
+        $this->getContainer()
+             ->share('session-handler', function () {
+
+                 $settings = array_merge(
+                     config()->get('session'),
+                     config()->get('cookie')
+                 );
+
+                 if (config()->get('session.handler') == 'redis') {
                      $client = new Client([
                          'scheme'   => 'tcp',
-                         'host'     => config()->get('app.settings.redis.host'),
-                         'port'     => config()->get('app.settings.redis.port'),
-                         'password' => config()->get('app.settings.redis.password')
+                         'host'     => config()->get('redis.host'),
+                         'port'     => config()->get('redis.port'),
+                         'password' => config()->get('redis.password')
                      ], [
-                         'prefix' => config()->get('app.settings.cache.prefix')
+                         'prefix' => config()->get('cache.prefix')
                      ]);
 
-                     $handler = new PredisSessionHandler($client, [
-                         'ttl' => config()->get('app.settings.session.ttl')
-                     ]);
+                     $handler = new PredisSessionHandler($client, $settings);
                  }
                  else {
                      // fall back to native session handler
-                     $handler = new \SessionHandler();
+                     $handler = new NativeSessionHandler($settings);
                  }
 
-                 return (new Session($handler, config()->get('app.settings.session.name')));
+                 return $handler;
+             });
+
+        // register session container
+        $this->getContainer()
+             ->share('session', function () {
+
+                 $handler = container()->get('session-handler');
+
+                 return (new Session($handler));
              });
     }
 }

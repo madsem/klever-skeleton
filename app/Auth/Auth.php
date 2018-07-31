@@ -7,6 +7,12 @@ use Klever\Models\User;
 
 class Auth
 {
+    protected $ttl;
+
+    function __construct()
+    {
+        $this->ttl = config()->get('session.ttl.auth');
+    }
 
     /**
      * Process authentication request
@@ -28,8 +34,7 @@ class Auth
         // we have a match
         if (password_verify($password, $user->password)) {
 
-            // generate a new session id for logged in user
-            session()->regenerate();
+            session()->regenerate($this->ttl, true);
 
             // session var with user id to do stuff with
             session()->set('user', $user->id);
@@ -64,6 +69,10 @@ class Auth
          */
         if (session()->exists('fingerprint')
             && session()->get('fingerprint') == $fingerprint) {
+
+            // extend session timeout
+            session()->regenerate($this->ttl);
+
             return true;
         }
 
@@ -75,7 +84,7 @@ class Auth
      */
     function logout()
     {
-        session()->destroy();
+        session()->flush();
     }
 
     /**

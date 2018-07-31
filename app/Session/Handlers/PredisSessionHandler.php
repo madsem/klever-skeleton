@@ -3,6 +3,7 @@
 namespace Klever\Session\Handlers;
 
 
+use Klever\Session\Contracts\SessionConfigurationInterface;
 use Predis\Client;
 
 /**
@@ -14,7 +15,10 @@ use Predis\Client;
  * Class PredisSessionHandler
  * @package Klever\Session\Handlers
  */
-class PredisSessionHandler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class PredisSessionHandler implements
+    \SessionHandlerInterface,
+    \SessionUpdateTimestampHandlerInterface,
+    SessionConfigurationInterface
 {
 
     /**
@@ -22,21 +26,65 @@ class PredisSessionHandler implements \SessionHandlerInterface, \SessionUpdateTi
      */
     protected $predis;
 
+    protected $session_name;
+
     /**
-     * @var int $ttl
+     * TTL in minutes
+     * @var mixed
      */
     protected $ttl;
+
+    protected $path;
+
+    protected $domain;
+
+    protected $secure;
+
+    protected $http_only;
 
     function __construct(Client $predis, array $settings)
     {
         $this->predis = $predis;
+        $this->session_name = $settings['name'];
+        $this->ttl = ($settings['ttl']['guests'] * 60) ?? (ini_get('session.gc_maxlifetime') * 60);
+        $this->path = $settings['path'];
+        $this->domain = getHostNoSubDomain() ?? $settings['domain'];
+        $this->secure = $settings['secure'];
+        $this->http_only = $settings['http_only'];
 
-        if (isset($settings['ttl'])) {
-            $this->ttl = (int)$settings['ttl'];
+        // session_set_save_handler() is this $handler object
+        if ($this instanceof \SessionHandlerInterface) {
+            session_set_save_handler($this, true);
         }
-        else {
-            $this->ttl = ini_get('session.gc_maxlifetime');
-        }
+
+        // set session name & cookie params
+        session_name($this->session_name);
+        session_set_cookie_params($this->ttl, $this->path, $this->domain, $this->secure, $this->http_only);
+
+        /**
+         * make sure we are using strict sessions, and cookies only
+         * to prevent session fixation / hijacking through session id's in urls
+         */
+        ini_set('session.use_strict_mode', 1);
+        ini_set('session.use_only_cookies', 1);
+    }
+
+    /**
+     * Start session
+     */
+    function start()
+    {
+        session_start();
+    }
+
+    /**
+     * Regenerate session ID
+     * delete old session & update cookie
+     */
+    function regenerate()
+    {
+        session_regenerate_id(true);
+        setcookie(session_name(),session_id(),time()+$this->ttl, $this->path, $this->domain, $this->secure, $this->http_only);
     }
 
     /**
@@ -46,7 +94,7 @@ class PredisSessionHandler implements \SessionHandlerInterface, \SessionUpdateTi
      */
     function write($session_id, $session_data)
     {
-        $this->predis->setex($session_id, (int)($this->ttl * 60), $session_data);
+        $this->predis->setex($session_id, (int)$this->ttl, $session_data);
 
         return true;
     }
@@ -147,6 +195,17 @@ class PredisSessionHandler implements \SessionHandlerInterface, \SessionUpdateTi
         }
 
         return true;
+    }
+
+    /**
+     * Set Time To Life
+     *
+     * @param int $ttl
+     * @return mixed|void
+     */
+    public function setTTL($ttl)
+    {
+        $this->ttl = ($ttl * 60);
     }
 
 }

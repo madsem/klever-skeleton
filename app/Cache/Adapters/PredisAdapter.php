@@ -5,6 +5,7 @@ namespace Klever\Cache\Adapters;
 
 use Klever\Cache\Adapters\Contracts\AdapterInterface;
 use Predis\Client;
+use Predis\Collection\Iterator;
 
 class PredisAdapter implements AdapterInterface
 {
@@ -14,9 +15,12 @@ class PredisAdapter implements AdapterInterface
      */
     protected $client;
 
+    protected $prefix;
+
     function __construct(Client $client)
     {
         $this->client = $client;
+        $this->prefix = $this->client->getOptions()->prefix->getPrefix();
     }
 
     /**
@@ -25,7 +29,7 @@ class PredisAdapter implements AdapterInterface
      */
     function get($key)
     {
-        return $this->client->get($key);
+        return $this->unSerializer($this->client->get($key));
     }
 
     /**
@@ -40,7 +44,7 @@ class PredisAdapter implements AdapterInterface
             return $this->forever($key, $value);
         }
 
-        return $this->client->setex($key, (int)max(1, $minutes * 60), $value);
+        return $this->client->setex($key, (int)max(1, $minutes * 60), $this->serializer($value));
     }
 
     /**
@@ -50,10 +54,12 @@ class PredisAdapter implements AdapterInterface
      */
     function forever($key, $value)
     {
-        return $this->client->set($key, $value);
+        return $this->client->set($key, $this->serializer($value));
     }
 
     /**
+     * Remember callback result, if result doesn't yet exist
+     * it is first written to redis and then returned.
      *
      * @param $key
      * @param null $minutes
@@ -62,11 +68,10 @@ class PredisAdapter implements AdapterInterface
      */
     function remember($key, $minutes = null, callable $callback)
     {
-        if ( ! is_null($value = $this->get($key))) {
-            return $value;
+        if (is_null($value = $this->get($key))) {
+            $this->put($key, $value = $callback(), $minutes);
+            $value = $this->get($key);
         }
-
-        $this->put($key, $value = $callback(), $minutes);
 
         return $value;
     }
@@ -74,11 +79,61 @@ class PredisAdapter implements AdapterInterface
     /**
      * Send DEL command to redis
      *
-     * @param string|array $key
+     * @param string|array $keys
      * @return int
      */
-    function forget($key)
+    function forget($keys)
     {
-        return $this->client->del($key);
+        return $this->client->del($keys);
+    }
+
+    /**
+     * Use Predis Iterator\Keyspace which uses SCAN under the hood
+     * to iterate over matching keys, and then trigger
+     * a non-blocking UNLINK (requires Redis 4.0)
+     *
+     * @param string $pattern = the pattern that should be used to MATCH
+     * @return bool
+     */
+    function forgetPattern($pattern)
+    {
+        $keys = [
+            'UNLINK'
+        ];
+
+        // append wildcard character if not present
+        $pattern = stripos($pattern, '*') !== false ? $pattern : $pattern . '*';
+
+        foreach (new Iterator\Keyspace($this->client, $this->prefix . $pattern) as $key) {
+            array_push($keys, $key);
+        }
+
+        return $this->client->executeRaw($keys);
+    }
+
+    /**
+     * Wrap elements in array and serialize
+     * before inserting to redis
+     *
+     * @param mixed $value
+     * @return string
+     */
+    private function serializer($value)
+    {
+        return serialize([$value]);
+    }
+
+    /**
+     * Unserialize items retrieved from redis
+     * and remove outer array wrapper again
+     *
+     * @param $value
+     * @return mixed
+     */
+    private function unSerializer($value)
+    {
+        $value = unserialize($value);
+
+        return $value[0];
     }
 }

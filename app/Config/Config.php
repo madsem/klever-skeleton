@@ -18,7 +18,7 @@ class Config
     }
 
     /**
-     * Get / set value from array cache
+     * Get value from array cache
      * for config values
      *
      * @param $key
@@ -38,8 +38,8 @@ class Config
     }
 
     /**
-     * Extract last part from dot notated string
-     * from config array
+     * Add Item to config, or
+     * change it if it already exists
      *
      * @param $key
      * @return array|mixed

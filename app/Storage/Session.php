@@ -3,34 +3,17 @@
 namespace Klever\Storage;
 
 
+use Klever\Session\Contracts\SessionConfigurationInterface;
 use Klever\Storage\Contracts\StorageInterface;
 
-final class Session implements StorageInterface
+class Session implements StorageInterface
 {
 
     protected $handler;
 
-    protected $session_name = 'session';
-
-    function __construct(\SessionHandlerInterface $handler, string $session_name)
+    function __construct(SessionConfigurationInterface $handler)
     {
         $this->handler = $handler;
-        $this->session_name = $session_name;
-
-        // session_set_save_handler() is this $handler object
-        if ($this->handler instanceof \SessionHandlerInterface) {
-            session_set_save_handler($this->handler, true);
-        }
-
-        /**
-         * make sure we are using strict sessions, and cookies only
-         * to prevent session fixation / hijacking through session id's in urls
-         */
-        ini_set('session.use_strict_mode', 1);
-        ini_set('session.use_only_cookies', 1);
-
-        // set session name
-        session_name($this->session_name);
     }
 
     /**
@@ -38,20 +21,35 @@ final class Session implements StorageInterface
      */
     function start()
     {
-        session_start();
+        $this->handler->start();
+
+        if ( ! isset($_SESSION['init'])) {
+            $_SESSION['init'] = time();
+        }
     }
 
     /**
      * Regenerate session ID
-     * & delete old session
+     * & delete old session every 5 minutes
      *
-     * If session ID should be regenerated again
-     * during the same session, this method needs to be extended.
-     * Right now it is only meant to regenerate after login.
+     * @param int $ttl = time to life for SessionHandlers that support it
+     * @param bool $force = force to regenerate disregarding timestamp
      */
-    function regenerate()
+    function regenerate($ttl, $force = false)
     {
-        session_regenerate_id(true);
+        // timeout has to be set on every request
+        // so that logged in users have a custom ttl
+        // as specified in the config
+        $this->handler->setTTL($ttl);
+
+        if ($force
+            || isset($_SESSION['init'])
+            && ($_SESSION['init'] < time() - 300)) {
+
+            $this->handler->regenerate();
+
+            $_SESSION['init'] = time();
+        }
     }
 
     /**
@@ -89,7 +87,7 @@ final class Session implements StorageInterface
     /**
      * @return mixed|void
      */
-    function destroy()
+    function flush()
     {
         $_SESSION = [];
         session_destroy();
@@ -120,11 +118,4 @@ final class Session implements StorageInterface
         return isset($_SESSION[$key]);
     }
 
-    /**
-     * @param $handler
-     */
-    function setHandler($handler)
-    {
-        $this->handler = $handler;
-    }
 }

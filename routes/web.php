@@ -1,7 +1,7 @@
 <?php
 
 // register web middleware
-foreach (config()->get('app.settings.middleware.web') as $middleware) {
+foreach (config()->get('middleware.web') as $middleware) {
     app()->add(new $middleware);
 }
 
@@ -21,4 +21,5 @@ foreach (config()->get('app.settings.middleware.web') as $middleware) {
         $this->post('/logout', '\Klever\Controllers\Auth\AuthController:logout')->setName('auth.logout');
     })
     ->add('csrf')
-    ->add('guard');
+    ->add('guard')
+    ->add('force-ssl');

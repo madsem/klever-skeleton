@@ -1,0 +1,20 @@
+<?php
+$namespaceDefinition
+
+use $useClassName;
+use \Illuminate\Database\Schema\Blueprint;
+
+class $className extends $baseClassName
+{
+    function up()
+    {
+        $this->schema->create('', function (Blueprint $table) {
+            $table->increments('id');
+        });
+    }
+
+    function down()
+    {
+        $this->schema->drop('');
+    }
+}

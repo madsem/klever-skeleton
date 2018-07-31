@@ -31,7 +31,7 @@ class CookieServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()
              ->share('cookie', function () {
-                 $cookieConfig = config()->get('app.settings.cookie');
+                 $cookieConfig = config()->get('cookie');
 
                  return new Cookie($cookieConfig);
              });

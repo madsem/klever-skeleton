@@ -18,7 +18,8 @@ class AuthMiddleware
     {
         if ( ! container()->get('auth')->verifySession()) {
 
-            session()->destroy();
+            session()->flush();
+
             return redirect(route('auth.login'));
         }
 

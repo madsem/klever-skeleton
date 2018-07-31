@@ -19,13 +19,25 @@ class CsrfExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
     function getGlobals()
     {
+        $nameKey = $this->csrf->getTokenNameKey();
+        $valueKey = $this->csrf->getTokenValueKey();
+        $tokenName = $this->csrf->getTokenName();
+        $tokenValue = $this->csrf->getTokenValue();
+
         // CSRF token name and value input fields
-        $field = '<input type="hidden" name="' . $this->csrf->getTokenNameKey() . '" value="' . $this->csrf->getTokenName() . '">';
-        $field .= '<input type="hidden" name="' . $this->csrf->getTokenValueKey() . '" value="' . $this->csrf->getTokenValue() . '">';
+        $field = '<input type="hidden" name="' . $nameKey . '" value="' . $tokenName . '">';
+        $field .= '<input type="hidden" name="' . $valueKey . '" value="' . $tokenValue . '">';
+
+        // Javascript Object
+        $object = json_encode([
+            $nameKey => $tokenName,
+            $valueKey => $tokenValue
+        ]);
 
         return [
             'csrf' => [
-                'field' => $field
+                'field' => $field,
+                'object' => $object,
             ]
         ];
     }
