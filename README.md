@@ -162,7 +162,7 @@ CSRF Field in Javascript:
 ```
 
 Various:
-```php
+```text
 
 # flash message
 message('error', 'Ooops, something went wrong');

@@ -38,7 +38,7 @@ return [
             'password'  => vars('DB_PASS', 'pass'),
             'charset'   => vars('DB_CHARSET', 'utf8mb4'),
             'collation' => vars('DB_COLLATION', 'utf8mb4_general_ci'),
-            'prefix'    => vars('DB_PREFIX', 'lps_'),
+            'prefix'    => vars('DB_PREFIX', 'klever_'),
         ],
     ],
 
