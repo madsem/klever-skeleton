@@ -20,7 +20,7 @@ class Cache implements AdapterInterface
 
     function put($key, $value, $minutes = null)
     {
-        return $this->adapter->put($key, $value, $minutes = null);
+        return $this->adapter->put($key, $value, $minutes);
     }
 
     function forever($key, $value)
@@ -30,7 +30,7 @@ class Cache implements AdapterInterface
 
     function remember($key, $minutes = null, callable $callback)
     {
-        return $this->adapter->remember($key, $minutes = null, $callback);
+        return $this->adapter->remember($key, $minutes, $callback);
     }
 
     function forget($key)
