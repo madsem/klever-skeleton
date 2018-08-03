@@ -2,8 +2,8 @@ vendor
 .idea
 .env
 node_modules
-!storage/cache/*
+composer.lock
+storage/cache/*
 !storage/cache/config
 !storage/cache/routes
 !storage/cache/views
-composer.lock
